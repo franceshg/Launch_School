@@ -3,24 +3,26 @@ const readline = require('readline-sync');
 const VALID_CHOICES = ['rock', 'paper', 'scissors', 'lizard', 'spock' ];
 const VALID_ENTRIES = ['r', 'p', 'sc', 'l', 'sp'];
 const PLAYER_WINS = {
-  'r': ['sc', 'l'],
-  'p': ['r', 'sp'],
-  'sc': ['p', 'l'],
-  'sp': ['r', 'sc'],
-  'l': ['sp', 'p']
-}
+  r: ['sc', 'l'],
+  p: ['r', 'sp'],
+  sc: ['p', 'l'],
+  sp: ['r', 'sc'],
+  l: ['sp', 'p']
+};
+
 const TO_WHOLE_WORD = {
   r: "rock",
   p: "paper",
   sc: "scissors",
   sp: "spock",
   l: "lizard"
-}
+};
+
 const BEST_OF = 3;
 
 let roundCount = 0;
-let playerCounter = 0
-let computerCounter = 0
+let playerCounter = 0;
+let computerCounter = 0;
 
 function prompt(msg) {
   console.log(`\n=> ${msg}`);
@@ -32,9 +34,9 @@ function roundCounter() {
 }
 
 function displayWinner(choice, computerChoice) {
-  prompt(`You chose ${TO_WHOLE_WORD[choice]}, computer chose ${TO_WHOLE_WORD[computerChoice]}`)
+  prompt(`You chose ${TO_WHOLE_WORD[choice]}, computer chose ${TO_WHOLE_WORD[computerChoice]}`);
   if  (PLAYER_WINS[choice].includes(computerChoice)) {
-    prompt('You win this round!')
+    prompt('You win this round!');
   } else if (choice === computerChoice) {
     prompt("This round is a tie!");
   } else {
@@ -47,7 +49,10 @@ function gameCounter(choice, computerChoice) {
     playerCounter += 1;
   } else if (choice === computerChoice) {
     return gameCounter;
-  } else computerCounter += 1;
+  } else {
+    (computerCounter += 1);
+  }
+  return gameCounter;
 }
 
 function gameTotal() {
@@ -67,9 +72,9 @@ function resetGame() {
 
 while (true) {
   resetGame();
-  prompt(`Welcome to Rock, Paper, Scissors, Lizaard, Spock! Winner is the first to ${BEST_OF}.\nGood Luck!\n`)
+  prompt(`Welcome to Rock, Paper, Scissors, Lizaard, Spock! Winner is the first to ${BEST_OF}.\nGood Luck!\n`);
 
-  while(playerCounter < BEST_OF && computerCounter < BEST_OF) {
+  while (playerCounter < BEST_OF && computerCounter < BEST_OF) {
     roundCounter();
 
     prompt(`Choose one: ${VALID_CHOICES.join(', ')}.\nPlease enter r for rock, p for paper, sc for scissors, l for lizard, or sp for spock.`);
@@ -90,9 +95,9 @@ while (true) {
   }
 
   prompt('Would you like to play again? (y/n)');
-  answer = readline.question().toLowerCase();
+  let answer = readline.question().toLowerCase();
 
-  while(answer !== 'y' && answer !== 'n') {
+  while (answer !== 'y' && answer !== 'n') {
     prompt("Please enter 'y' or 'n'");
     answer = readline.question().toLowerCase();
   }
