@@ -23,14 +23,36 @@ const BEST_OF = 3;
 let roundCount = 0;
 let playerCounter = 0;
 let computerCounter = 0;
+let choice;
+let computerChoice;
+let answer;
 
 function prompt(msg) {
   console.log(`\n=> ${msg}`);
 }
 
+function welcomeMessage() {
+  prompt(`Welcome to Rock, Paper, Scissors, Lizaard, Spock!\nScissors cuts paper\nPaper covers rock\nRock crushes lizard\nLizard poisons Spock\nSpock smashes scissors\nScissors decapitates lizard\nLizard eats paper\nPaper disproves Spock\nSpock vaporizes rock\nRock crushes scissors\n\nWinner is the first to ${BEST_OF}.\nGood Luck!\n`)
+}
+
 function roundCounter() {
   roundCount += 1;
   prompt(`Round ${roundCount}!`);
+}
+
+function playersMove() {
+  prompt(`Choose one: ${VALID_CHOICES.join(', ')}.\nPlease enter r for rock, p for paper, sc for scissors, l for lizard, or sp for spock.`);
+  choice = readline.question();
+
+  while (!VALID_ENTRIES.includes(choice)) {
+    prompt("That's not a valid choice.");
+    choice = readline.question();
+  }
+}
+
+function computersMove() {
+  let randomIndex = Math.floor(Math.random() * VALID_ENTRIES.length);
+    computerChoice = VALID_ENTRIES[randomIndex];
 }
 
 function displayWinner(choice, computerChoice) {
@@ -63,6 +85,18 @@ function gameTotal() {
   }
 }
 
+let next = false;
+function nextRound() {
+  prompt('Press enter to continue')
+    next = readline.question();
+
+  if (next = true) {
+    console.clear()
+  }
+  return nextRound;
+}
+ 
+
 function resetGame() {
   playerCounter = 0;
   computerCounter = 0;
@@ -70,40 +104,36 @@ function resetGame() {
   console.clear();
 }
 
-while (true) {
-  resetGame();
-  prompt(`Welcome to Rock, Paper, Scissors, Lizaard, Spock! Winner is the first to ${BEST_OF}.\nGood Luck!\n`);
+function playAgain() {
+  prompt('Would you like to play again? (y/n)');
+  answer = readline.question().toLowerCase();
 
-  while (playerCounter < BEST_OF && computerCounter < BEST_OF) {
+  while (answer !== 'y' && answer !== 'yes' && answer !== 'n' && answer !== 'no') {
+    prompt("Please enter 'y' or 'n'");
+    answer = readline.question().toLowerCase();
+  }}
+  
+while (true) {
+    resetGame();
+    welcomeMessage();
+
+  while (playerCounter < BEST_OF && computerCounter < BEST_OF) {   
     roundCounter();
 
-    prompt(`Choose one: ${VALID_CHOICES.join(', ')}.\nPlease enter r for rock, p for paper, sc for scissors, l for lizard, or sp for spock.`);
-    let choice = readline.question();
+    playersMove();
 
-    while (!VALID_ENTRIES.includes(choice)) {
-      prompt("That's not a valid choice.");
-      choice = readline.question();
-    }
-
-    let randomIndex = Math.floor(Math.random() * VALID_ENTRIES.length);
-    let computerChoice = VALID_ENTRIES[randomIndex];
+    computersMove();    
 
     displayWinner(choice, computerChoice);
     gameCounter(choice, computerChoice);
     prompt(`The current score is:\nplayer:${playerCounter}\ncomputer:${computerCounter}\n`);
     gameTotal();
+    nextRound();
   }
-
-  prompt('Would you like to play again? (y/n)');
-  let answer = readline.question().toLowerCase();
-
-  while (answer !== 'y' && answer !== 'n') {
-    prompt("Please enter 'y' or 'n'");
-    answer = readline.question().toLowerCase();
-  }
+  playAgain();
 
   if (answer === 'n') {
-    prompt('Thank you for playing Rock Paper Scissors Lizard Spock');
+    prompt('Thank you for playing Rock Paper Scissors Lizard Spock!')
     break;
   }
 }
