@@ -252,7 +252,6 @@ while (true) {
   while (answer !== 'y' && answer !== 'n') {
     prompt('That is not a valid response. Please choose y to continue or n to exit');
     answer = readline.question().toLowerCase();
-    console.log(answer);
   }
   if (answer === 'n') break;
 }
