@@ -15,6 +15,8 @@ const FIRST_PLAYER_CHOICE_NAMES = {
   p : 'Player',
   c : 'Computer',
 };
+let computerSquare;
+let playAgainAnswer = '';
 
 function displayBoard(board) {
   console.clear();
@@ -51,7 +53,7 @@ function prompt(msg) {
 function decideFirstPlayer() {
   prompt('Who should go first each round in this Game? Player (p), Computer (c), or Random (r)?');
   currentPlayer = readline.question();
-  if (currentPlayer !== 'p' && currentPlayer !== 'c' && currentPlayer !== 'r') {
+  while (currentPlayer !== 'p' && currentPlayer !== 'c' && currentPlayer !== 'r') {
     prompt('This is not a valid choice. Please choose p for Player, c for Computer or r for Random');
     currentPlayer = readline.question();
   }
@@ -87,17 +89,17 @@ function emptySquares(board) {
 }
 
 function playerChoosesSquare(board) {
-  let square;
+  let playerSquare;
 
   while (true) {
     prompt(`Choose a square ${joinOr(emptySquares(board))}`);
-    square = readline.question().trim();
-    if (emptySquares(board).includes(square)) break;
+    playerSquare = readline.question().trim();
+    if (emptySquares(board).includes(playerSquare)) break;
 
     prompt('That is not a valid choice');
   }
 
-  board[square] = HUMAN_MARKER;
+  board[playerSquare] = HUMAN_MARKER;
 }
 
 function findAtRiskSquare(line, board, marker) {
@@ -112,29 +114,38 @@ function findAtRiskSquare(line, board, marker) {
   return null;
 }
 
-
-function computerChoosesSquare(board) {
-  let square;
+function computerOffensiveMove(board) {
   for (let index = 0; index < WINNING_LINES.length; index++ ) {
     let line = WINNING_LINES[index];
-    square = findAtRiskSquare(line, board, COMPUTER_MARKER);
-    if (square) break;
+    computerSquare = findAtRiskSquare(line, board, COMPUTER_MARKER);
+    if (computerSquare) break;
   }
+}
 
-  if (!square) {
+function computerDefensiveMove(board) {
+  if (!computerSquare) {
     for (let index = 0; index < WINNING_LINES.length; index++ ) {
       let line = WINNING_LINES[index];
-      square = findAtRiskSquare(line, board, HUMAN_MARKER);
-      if (square) break;
+      computerSquare = findAtRiskSquare(line, board, HUMAN_MARKER);
+      if (computerSquare) break;
     }
   }
+}
 
-  if (!square) {
+function computerRandomMove(board) {
+  if (!computerSquare) {
     let randomIndex = Math.floor(Math.random() * emptySquares(board).length);
-    square = emptySquares(board)[randomIndex];
+    computerSquare = emptySquares(board)[randomIndex];
   }
+}
 
-  board[square] = COMPUTER_MARKER;
+function computerChoosesSquare(board) {
+
+  computerOffensiveMove(board);
+  computerDefensiveMove(board);
+  computerRandomMove(board);
+
+  board[computerSquare] = COMPUTER_MARKER;
 }
 
 function boardFull(board) {
@@ -150,29 +161,24 @@ function detectWinner(board) {
   for (let line = 0; line < WINNING_LINES.length; line++) {
     let [sq1, sq2, sq3] = WINNING_LINES[line];
 
-    if (
-      board[sq1] === HUMAN_MARKER &&
-      board[sq2] === HUMAN_MARKER &&
-      board[sq3] === HUMAN_MARKER
-    ) {
+    if ([sq1, sq2, sq3].every(square => board[square] === HUMAN_MARKER)) {
       return 'Player';
-    } else if (
-      board[sq1] === COMPUTER_MARKER &&
-      board[sq2] === COMPUTER_MARKER &&
-      board[sq3] === COMPUTER_MARKER
-    ) {
+    } else if ([sq1, sq2, sq3].every(square => board[square] === COMPUTER_MARKER)) {
       return 'Computer';
     }
   }
 
   return null;
 }
-
-function greeting() {
+function resetGame() {
   console.clear();
   playerScore = 0;
   computerScore = 0;
   currentPlayer = '';
+}
+
+function greeting() {
+
   prompt(`Welcome to Tic Tac Toe! This game is best of ${NUMBER_OF_ROUNDS} rounds.`);
   prompt('The grid choices are 1 - 9 from top left to bottom right.');
   prompt('Good luck!');
@@ -218,7 +224,20 @@ function addScores(board) {
   prompt(`The current score is:\nPlayer:${playerScore}\nComputer:${computerScore}`);
 }
 
+function playAgain() {
+  prompt(`Play again? (y or n)`);
+  playAgainAnswer = readline.question().toLowerCase();
+
+  while (playAgainAnswer !== 'y' && playAgainAnswer !== 'n') {
+    prompt('That is not a valid response. Please choose y to continue or n to exit');
+    playAgainAnswer = readline.question().toLowerCase();
+  }
+}
+
+// MAIN GAME BODY 
+
 while (true) {
+  resetGame();
   greeting();
   decideFirstPlayer();
 
@@ -245,15 +264,9 @@ while (true) {
 
     nextRound();
   }
+  playAgain();
 
-  prompt(`Play again? (y or n)`);
-  let answer = readline.question().toLowerCase();
-
-  while (answer !== 'y' && answer !== 'n') {
-    prompt('That is not a valid response. Please choose y to continue or n to exit');
-    answer = readline.question().toLowerCase();
-  }
-  if (answer === 'n') break;
+  if (playAgainAnswer === 'n') break;
 }
 
 prompt('Thanks for playing Tic Tac Toe!');
