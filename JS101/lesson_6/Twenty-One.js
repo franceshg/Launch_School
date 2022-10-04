@@ -17,7 +17,12 @@ let playerTotal = 0;
 let dealerTotal = 0;
 let gameTotal = 21;
 let gameName = 'Twenty-One';
-let highestDealerTotal = 17;
+let playAgainAnswer = '';
+let hitOrStayAnswer = '';
+const highestDealerTotal = 17;
+const ACE_VALUE = 11;
+const FACE_CARD_VALUE = 10;
+const ACE_CORRECTION_VALUE = 10;
 
 function prompt(msg) {
   console.log(`--> ${msg}`);
@@ -36,8 +41,8 @@ function greeting() {
 }
 
 function initializeDeck(cards) {
-  let suits = ['Hearts', 'Spades', 'Clubs', 'Diamonds'];
-  let values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 'Jack', 'Queen', 'King', 'Ace'];
+  const suits = ['Hearts', 'Spades', 'Clubs', 'Diamonds'];
+  const values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 'Jack', 'Queen', 'King', 'Ace'];
   for (let index = 0; index < suits.length; index++) {
     for (let id = 0; id < values.length; id++) {
       cards.push([values[id], suits[index]]);
@@ -55,16 +60,16 @@ function total(cards) {
   let sum = 0;
   values.forEach(value => {
     if (value === 'Ace') {
-      sum += 11;
+      sum += ACE_VALUE;
     } else if (['Jack', 'Queen', 'King'].includes(value)) {
-      sum += 10;
+      sum += FACE_CARD_VALUE;
     } else {
       sum += Number(value);
     }
   });
 
   values.filter(value => value === 'Ace').forEach(_ => {
-    if (sum > gameTotal) sum -= 10;
+    if (sum > gameTotal) sum -= ACE_CORRECTION_VALUE;
   });
 
   return sum;
@@ -104,28 +109,30 @@ function startGame(cards) {
 }
 
 function busted() {
-  if (playerTotal > gameTotal || dealerTotal > gameTotal) {
-    return true;
+  return (playerTotal > gameTotal) || (dealerTotal > gameTotal)
+}
+
+function promptHitOrStay() {
+  prompt('hit or stay?');
+  hitOrStayAnswer = readline.question().trim();
+  while (hitOrStayAnswer !== 'hit' && hitOrStayAnswer !== 'stay') {
+    hitOrStayAnswer = readline.question(`That is not a valid entry. Please choose stay or hit\n`);
   }
-  return false;
 }
 
 function playerMoves(cards) {
   while (true) {
-    prompt('hit or stay?');
-    let answer = readline.question().trim();
-    while (answer !== 'hit' && answer !== 'stay') {
-      answer = readline.question(`That is not a valid entry. Please choose stay or hit\n`);
-    }
+    promptHitOrStay();
 
-    if (answer === 'hit') {
+    if (hitOrStayAnswer === 'hit') {
+      console.clear();
       playersCards.push(dealCard(cards));
       playerTotal = total(playersCards);
       prompt(`You have been dealt a ${playersCards[playersCards.length - 1].join(' ')}`);
       prompt(`Your current total is ${playerTotal}\n`);
     }
 
-    if (answer === 'stay') break;
+    if (hitOrStayAnswer === 'stay') break;
 
     if (busted()) {
       prompt('BUST');
@@ -134,11 +141,26 @@ function playerMoves(cards) {
   }
 }
 
+function revealDealerCards() {
+  prompt(`The dealer's face down card is revealed. It is a ${dealersCards[1].join(' ')}`);
+  prompt(`The dealer's current total is ${dealerTotal}\n`);
+}
+
+function dealerHits(cards) {
+  console.clear();
+  dealersCards.push(dealCard(cards));
+  dealerTotal = total(dealersCards);
+}
+
+function dealerResults() {
+  prompt(`The dealer was dealt a ${dealersCards[dealersCards.length - 1].join(' ')}`);
+  prompt(`The dealer's current total is ${dealerTotal}\n`);
+}
+
 function dealerMoves(cards) {
   while (true) {
     if (busted()) break;
-    prompt(`The dealer's face down card is revealed. It is a ${dealersCards[1].join(' ')}`);
-    prompt(`The dealer's current total is ${dealerTotal}\n`);
+    revealDealerCards();
 
     while (true) {
       if (busted()) {
@@ -146,35 +168,33 @@ function dealerMoves(cards) {
         break;
       }
       if (dealerTotal >= highestDealerTotal) break;
+    
+      dealerHits(cards);
 
-      dealersCards.push(dealCard(cards));
-      dealerTotal = total(dealersCards);
-      console.log('(Press any key to continue)');
-      readline.keyIn();
-      prompt(`The dealer was dealt a ${dealersCards[dealersCards.length - 1].join(' ')}`);
-      prompt(`The dealer's current total is ${dealerTotal}\n`);
+      dealerResults();
 
     }
     break;
   }
 }
 
-function decideWinner(playersCards, dealersCards) {
-  switch (true) {
-    case (busted(playersCards)):
-      prompt(`Dealer Wins!\n`);
-      break;
-    case (busted(dealersCards)):
-      prompt(`Player Wins!\n`);
-      break;
-    case (dealerTotal > playerTotal):
-      prompt(`Dealer Wins!\n`);
-      break;
-    case (playerTotal > dealerTotal):
-      prompt(`Player Wins!\n`);
-      break;
-    case ( dealerTotal === playerTotal):
+function decideWinner() {
+  if ( dealerTotal === playerTotal) {
       prompt(`It's a tie!\n`);
+  } else if ((playerTotal > gameTotal) || (dealerTotal > playerTotal) && (dealerTotal <= gameTotal)) {
+      prompt(`Dealer Wins!\n`);
+  } else {
+    prompt(`Player Wins!\n`);
+  }
+}
+
+function playAgain() {
+  prompt(`Play again? (y or n)`);
+  playAgainAnswer = readline.question().toLowerCase().trim();
+
+  while (playAgainAnswer !== 'y' && playAgainAnswer !== 'n') {
+    prompt('That is not a valid response. Please choose y to continue or n to exit');
+    playAgainAnswer = readline.question().toLowerCase();
   }
 }
 
@@ -189,16 +209,10 @@ while (true) {
     startGame(cards);
     playerMoves(cards);
     dealerMoves(cards);
-    decideWinner(playersCards, dealersCards);
+    decideWinner();
 
-    prompt(`Play again? (y or n)`);
-    let answer = readline.question().toLowerCase().trim();
-
-    while (answer !== 'y' && answer !== 'n') {
-      prompt('That is not a valid response. Please choose y to continue or n to exit');
-      answer = readline.question().toLowerCase();
-    }
-    if (answer === 'n') {
+    playAgain();    
+    if (playAgainAnswer === 'n') {
       prompt('Thank you for playing Twenty-One!');
       break;
     }
