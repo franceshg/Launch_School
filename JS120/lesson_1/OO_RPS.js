@@ -37,7 +37,7 @@ const WINNING_MOVES = {
   paper: ['rock', 'spock'],
   scissors: ['paper', 'lizard'],
   lizard: ['spock', 'paper'],
-  spock: ['rock', 'scissors'] 
+  spock: ['rock', 'scissors']
 };
 const CHOICES = Object.keys(WINNING_MOVES);
 
@@ -62,7 +62,6 @@ function createComputer() {
   let playerObject = createPlayer();
 
   let computerObject = {
-
     choices: CHOICES,
     loss: null,
 
@@ -161,11 +160,8 @@ const RPSGame = {
   },
 
   play() {
-
     while (true) {
       this.displayWelcomeMessage();
-      let humanScore = 0;
-      let computerScore = 0;
       let round = 1;
 
       while (true) {
@@ -173,16 +169,16 @@ const RPSGame = {
         this.human.choose();
         this.computer.choose();
         this.displayWinner();
-        
 
         console.log(`The current score is: \nPlayer: ${this.human.score}\nComputer: ${this.computer.score}`);
-        if (this.human.score === WINNING_SCORE || this.computer.score === WINNING_SCORE) break;
-        
+        if (this.human.score === WINNING_SCORE ||
+          this.computer.score === WINNING_SCORE) break;
+
         round += 1;
         console.log('\n(Press any key to continue)');
         readline.keyIn();
         console.clear();
-        }
+      }
 
       if (this.human.score === WINNING_SCORE) {
         console.log('\n> > > You win the game! < < <');
@@ -198,8 +194,7 @@ const RPSGame = {
       }
     }
   },
-}
-
+};
 
 
 RPSGame.play();
